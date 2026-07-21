@@ -1,0 +1,6 @@
+{
+  "name": "Partsdrive ZA",
+  "description": "An automotive parts advertising marketplace in South Africa where sellers subscribe on a monthly basis to showcase parts, featuring advanced search filters and secure payment integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

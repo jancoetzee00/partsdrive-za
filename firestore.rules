@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive Definition
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // Entity: SellerProfile
+    function isValidSeller(data) {
+      return data.keys().hasAll(['id', 'name', 'email', 'phone', 'whatsapp', 'location', 'province', 'subscriptionActive', 'createdAt'])
+        && data.id is string
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 100
+        && data.phone is string && data.phone.size() <= 40
+        && data.whatsapp is string && data.whatsapp.size() <= 40
+        && data.location is string && data.location.size() <= 100
+        && data.province is string && data.province.size() <= 50
+        && data.subscriptionActive is bool
+        && (!data.keys().hasAny(['subscriptionTier']) || data.subscriptionTier == null || (data.subscriptionTier is string && (data.subscriptionTier == 'starter' || data.subscriptionTier == 'pro')))
+        && (!data.keys().hasAny(['subscriptionExpiry']) || data.subscriptionExpiry == null || data.subscriptionExpiry is string)
+        && data.createdAt is string;
+    }
+
+    // Entity: Part
+    function isValidPart(data) {
+      return data.keys().hasAll(['title', 'category', 'price', 'condition', 'make', 'model', 'year', 'description', 'location', 'province', 'sellerId', 'sellerName', 'sellerPhone', 'sellerEmail', 'sellerWhatsApp', 'sellerVerified', 'sellerType', 'images', 'createdAt', 'views'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.category is string && data.category.size() <= 100
+        && (data.price is int || data.price is float) && data.price >= 0
+        && data.condition is string && data.condition.size() <= 50
+        && data.make is string && data.make.size() <= 100
+        && data.model is string && data.model.size() <= 100
+        && data.year is int && data.year >= 1900 && data.year <= 2100
+        && data.description is string && data.description.size() <= 5000
+        && data.location is string && data.location.size() <= 100
+        && data.province is string && data.province.size() <= 50
+        && data.sellerId is string
+        && data.sellerName is string && data.sellerName.size() <= 100
+        && data.sellerPhone is string && data.sellerPhone.size() <= 40
+        && data.sellerEmail is string && data.sellerEmail.size() <= 100
+        && data.sellerWhatsApp is bool
+        && data.sellerVerified is bool
+        && data.sellerType is string && (data.sellerType == 'private' || data.sellerType == 'dealer')
+        && data.images is list && data.images.size() <= 20
+        && data.createdAt is string
+        && data.views is int && data.views >= 0
+        && (!data.keys().hasAny(['compatibility']) || data.compatibility is list);
+    }
+
+    // Entity: PriceAlert
+    function isValidPriceAlert(data) {
+      return data.keys().hasAll(['id', 'partId', 'partTitle', 'email', 'initialPrice', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.partId is string && data.partId.size() <= 128
+        && data.partTitle is string && data.partTitle.size() > 0 && data.partTitle.size() <= 200
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 100
+        && (data.initialPrice is int || data.initialPrice is float) && data.initialPrice >= 0
+        && data.createdAt is string;
+    }
+
+    // Match sellers
+    match /sellers/{sellerId} {
+      // Anyone can look up a seller profile to read info
+      allow get: if true;
+      allow create: if isSignedIn() && sellerId == request.auth.uid && incoming().id == request.auth.uid && isValidSeller(incoming());
+      allow update: if isSignedIn() && sellerId == request.auth.uid && incoming().id == request.auth.uid && isValidSeller(incoming()) && (
+        incoming().createdAt == existing().createdAt &&
+        incoming().id == existing().id
+      );
+      allow delete: if isSignedIn() && sellerId == request.auth.uid;
+    }
+
+    // Match parts
+    match /parts/{partId} {
+      allow get, list: if true;
+      allow create: if (
+        isSignedIn() && 
+        isValidId(partId) && 
+        isValidPart(incoming()) && 
+        incoming().sellerId == request.auth.uid && (
+          (!incoming().sellerVerified || get(/databases/$(database)/documents/sellers/$(request.auth.uid)).data.subscriptionActive == true)
+        )
+      ) || (
+        !isSignedIn() && 
+        isValidId(partId) && 
+        (partId == 'part-1' || partId == 'part-2' || partId == 'part-3' || partId == 'part-4' || partId == 'part-5' || partId == 'part-6') && 
+        isValidPart(incoming()) && (
+          incoming().sellerId == 'dealer-1' || 
+          incoming().sellerId == 'dealer-2' || 
+          incoming().sellerId == 'private-1' || 
+          incoming().sellerId == 'dealer-3' || 
+          incoming().sellerId == 'dealer-4' || 
+          incoming().sellerId == 'private-2'
+        )
+      );
+      allow update: if (
+        // Branch 1: Anyone can increment view count
+        (incoming().diff(existing()).affectedKeys().hasOnly(['views']) && 
+         incoming().views == existing().views + 1)
+      ) || (
+        // Branch 2: The logged-in seller can modify their own listing
+        isSignedIn() && 
+        existing().sellerId == request.auth.uid && 
+        isValidPart(incoming()) && 
+        incoming().sellerId == existing().sellerId &&
+        incoming().sellerId == request.auth.uid &&
+        incoming().createdAt == existing().createdAt && (
+          (!incoming().sellerVerified || get(/databases/$(database)/documents/sellers/$(request.auth.uid)).data.subscriptionActive == true)
+        )
+      );
+      allow delete: if isSignedIn() && existing().sellerId == request.auth.uid;
+    }
+
+    // Match priceAlerts
+    match /priceAlerts/{alertId} {
+      allow get, list: if true;
+      allow create: if isValidId(alertId) && isValidPriceAlert(incoming());
+    }
+  }
+}

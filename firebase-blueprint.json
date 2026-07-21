@@ -1,0 +1,118 @@
+{
+  "entities": {
+    "Part": {
+      "title": "Part",
+      "description": "An automotive spare part listing",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "condition": { "type": "string" },
+        "make": { "type": "string" },
+        "model": { "type": "string" },
+        "year": { "type": "number" },
+        "description": { "type": "string" },
+        "location": { "type": "string" },
+        "province": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "sellerPhone": { "type": "string" },
+        "sellerEmail": { "type": "string" },
+        "sellerWhatsApp": { "type": "boolean" },
+        "sellerVerified": { "type": "boolean" },
+        "sellerType": { "type": "string" },
+        "images": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "views": { "type": "number" },
+        "compatibility": { "type": "array" }
+      },
+      "required": [
+        "title",
+        "category",
+        "price",
+        "condition",
+        "make",
+        "model",
+        "year",
+        "description",
+        "location",
+        "province",
+        "sellerId",
+        "sellerName",
+        "sellerPhone",
+        "sellerEmail",
+        "sellerWhatsApp",
+        "sellerVerified",
+        "sellerType",
+        "images",
+        "createdAt",
+        "views"
+      ]
+    },
+    "SellerProfile": {
+      "title": "SellerProfile",
+      "description": "A seller profile registration and subscription details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "location": { "type": "string" },
+        "province": { "type": "string" },
+        "subscriptionActive": { "type": "boolean" },
+        "subscriptionTier": { "type": "string" },
+        "subscriptionExpiry": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "phone",
+        "whatsapp",
+        "location",
+        "province",
+        "subscriptionActive",
+        "createdAt"
+      ]
+    },
+    "PriceAlert": {
+      "title": "PriceAlert",
+      "description": "A notification alert set by a buyer for a spare part price drop",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "partId": { "type": "string" },
+        "partTitle": { "type": "string" },
+        "email": { "type": "string" },
+        "initialPrice": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": [
+        "id",
+        "partId",
+        "partTitle",
+        "email",
+        "initialPrice",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "parts/{partId}": {
+      "schema": "Part",
+      "description": "Automotive parts listings"
+    },
+    "sellers/{sellerId}": {
+      "schema": "SellerProfile",
+      "description": "Seller profile and subscription tier info"
+    },
+    "priceAlerts/{alertId}": {
+      "schema": "PriceAlert",
+      "description": "Price drop alerts registered by buyers"
+    }
+  }
+}

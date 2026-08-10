@@ -14,7 +14,7 @@
 3. **Privilege Escalation on User Profile**: Mutating `subscriptionActive = true` on `sellers/userA` directly from the client SDK without a valid subscription payment.
 4. **Mutating Immutable Fields**: Attempting to modify `createdAt` of an existing part listing.
 5. **View Hijacking (Incremental Spoofing)**: Trying to update a part's `views` field to `99999` instead of increments of 1.
-6. **Malicious ID Injection**: Creating a part doc with an ID like `/parts/$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$` to cause wallet denial.
+
 7. **Cross-Seller Part Mutation**: Authenticating as `userA` and trying to edit `title` on a part where `sellerId == "userB"`.
 8. **Malicious Part Payload (Type Poisoning)**: Sending a string like `price = "one million"` instead of a number.
 9. **Spamming Empty Fields**: Creating a part listing missing required fields like `title`, `category`, etc.

@@ -12,7 +12,6 @@
 4. **Mutating Immutable Fields**: Attempting to modify `createdAt` of an existing part listing.
 5. **View Hijacking (Incremental Spoofing)**: Trying to update a part's `views` field to `99999` instead of increments of 1.
 7. **Cross-Seller Part Mutation**: Authenticating as `userA` and trying to edit `title` on a part where `sellerId == "userB"`.
-8. **Malicious Part Payload (Type Poisoning)**: Sending a string like `price = "1000000"` instead of a number.
 9. **Spamming Empty Fields**: Creating a part listing missing required fields like `title`, `category`, etc.
 10. **Spoofing Verification Status on Part Listing**: Creating a part listing with `sellerVerified = true` when the user's `sellers` profile is actually unsubscribed.
 11. **Altering Another Seller's Profile**: Authenticating as `userA` and updating `sellers/userB`'s name or contact phone.

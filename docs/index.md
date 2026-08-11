@@ -1,7 +1,7 @@
-# PartsDrive ZA
+# PartsDrive_ZA
 
-Welcome to PartsDrive ZA - Your parts and components directory for South Africa.
+Welcome to PartsDrive_ZA - Your parts and components directory for South Africa.
 
 ## Getting Started
 
-This is the documentation site for the PartsDrive ZA project.
+This is the documentation site for the PartsDrive_ZA project.
